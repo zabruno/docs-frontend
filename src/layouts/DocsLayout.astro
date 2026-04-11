@@ -1,22 +1,17 @@
 ---
-// Layout de 3 columnas: sidebar, contenido, TOC
+// Layout de 3 columnas con soporte para view switching
 import Layout from './Layout.astro';
 import { getSections } from '../lib/api';
 
 export interface Props {
   title: string;
   description?: string;
+  error?: boolean;
+  activeView?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, error = false, activeView = 'home' } = Astro.props;
 const sections = await getSections();
-
-// Links fijos de navegacion
-const fixedLinks = [
-  { label: 'Ayuda', href: '/' },
-  { label: 'Novedades', href: '/novedades' },
-  { label: 'Soporte', href: '/soporte' },
-];
 ---
 
 <Layout title={title} description={description}>
@@ -30,16 +25,26 @@ const fixedLinks = [
           <span class="text-gray-500">Docs</span>
         </a>
 
-        {/* Fixed navigation links */}
+        {/* Fixed navigation links - client-side view switching */}
         <nav class="space-y-1 mb-6">
-          {fixedLinks.map(link => (
-            <a
-              href={link.href}
-              class="block px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              {link.label}
-            </a>
-          ))}
+          <button
+            data-view="home"
+            class="nav-btn w-full text-left px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            Ayuda
+          </button>
+          <button
+            data-view="novedades"
+            class="nav-btn w-full text-left px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            Novedades
+          </button>
+          <button
+            data-view="soporte"
+            class="nav-btn w-full text-left px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            Soporte
+          </button>
         </nav>
 
         {/* Separator */}
@@ -65,17 +70,75 @@ const fixedLinks = [
     {/* Main Content Area */}
     <main class="flex-1 ml-64 mr-64">
       <div class="max-w-4xl mx-auto px-8 py-12">
-        <slot />
+        {/* Error state */}
+        {error ? (
+          <div class="text-center py-20">
+            <h1 class="text-6xl font-bold text-orange-500 mb-4">404</h1>
+            <p class="text-xl text-gray-600 dark:text-gray-400 mb-6">
+              Pagina no encontrada
+            </p>
+            <p class="text-gray-500 dark:text-gray-500 mb-8">
+              El contenido que buscas no existe o fue movido.
+            </p>
+            <button
+              data-view="home"
+              class="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+            >
+              Volver al inicio
+            </button>
+          </div>
+        ) : (
+          <slot view={activeView} />
+        )}
       </div>
     </main>
 
-    {/* Right Sidebar - Table of Contents (placeholder for now) */}
+    {/* Right Sidebar - Table of Contents */}
     <aside class="w-64 border-l border-gray-200 dark:border-gray-800 fixed right-0 h-screen overflow-y-auto bg-white dark:bg-gray-900">
       <div class="p-4">
         <slot name="toc" />
       </div>
     </aside>
   </div>
+
+  {/* View switching script - minimal vanilla JS */}
+  <script>
+    function initViewSwitcher() {
+      const navBtns = document.querySelectorAll<HTMLButtonElement>('[data-view]');
+      
+      navBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const view = btn.dataset.view;
+          
+          // Ocultar todas las vistas
+          document.querySelectorAll<HTMLElement>('.view').forEach(v => {
+            v.classList.add('hidden');
+          });
+          
+          // Mostrar la vista seleccionada
+          const targetView = document.getElementById(`view-${view}`);
+          if (targetView) {
+            targetView.classList.remove('hidden');
+          }
+          
+          // Actualizar estado activo en sidebar
+          navBtns.forEach(b => {
+            b.classList.remove('bg-orange-100', 'dark:bg-orange-900/30', 'text-orange-600', 'dark:text-orange-400');
+            b.classList.add('text-gray-700', 'dark:text-gray-300');
+          });
+          btn.classList.remove('text-gray-700', 'dark:text-gray-300');
+          btn.classList.add('bg-orange-100', 'dark:bg-orange-900/30', 'text-orange-600', 'dark:text-orange-400');
+          
+          // Scroll al inicio
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+    }
+    
+    // Inicializar al cargar
+    initViewSwitcher();
+  </script>
 </Layout>
 
 <style>

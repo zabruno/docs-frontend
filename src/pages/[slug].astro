@@ -10,56 +10,70 @@ if (!slug) {
   return Astro.redirect('/');
 }
 
-let article;
+// Intentar obtener el articulo, marcar error si no existe
+let article = null;
+let notFound = false;
+
 try {
   article = await getArticle(slug);
 } catch (error) {
-  return new Response(null, { status: 404 });
+  notFound = true;
 }
 
-// Procesar markdown en el servidor
-const html = await parseMarkdown(article.content);
-const headings = extractHeadings(html);
+// Procesar markdown en el servidor solo si el articulo existe
+let html = '';
+let headings: { level: number; id: string; text: string }[] = [];
+
+if (article) {
+  html = await parseMarkdown(article.content);
+  headings = extractHeadings(html);
+}
 ---
 
-<DocsLayout title={article.title}>
-  {/* Contenido principal */}
-  <article class="article-content">
-    {/* Breadcrumb */}
-    {article.section && (
-      <nav class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-        <a href="/" class="hover:text-orange-600 dark:hover:text-orange-400">Ayuda</a>
-        <span class="mx-2">/</span>
-        <a href={`/section/${encodeURIComponent(article.section)}`} class="hover:text-orange-600 dark:hover:text-orange-400">
-          {article.section}
-        </a>
-      </nav>
-    )}
+<DocsLayout title={notFound ? "No encontrado" : article!.title} error={notFound}>
+  {notFound ? (
+    // El error se muestra en DocsLayout, este slot queda vacio
+    <div></div>
+  ) : (
+    <article class="article-content">
+      {/* Breadcrumb */}
+      {article!.section && (
+        <nav class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          <button data-view="home" class="hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer">
+            Ayuda
+          </button>
+          <span class="mx-2">/</span>
+          <a href={`/section/${encodeURIComponent(article!.section)}`} class="hover:text-orange-600 dark:hover:text-orange-400">
+            {article!.section}
+          </a>
+        </nav>
+      )}
 
-    {/* Titulo */}
-    <h1 class="text-4xl font-bold mb-6 text-gray-900 dark:text-white">
-      {article.title}
-    </h1>
+      {/* Titulo */}
+      <h1 class="text-4xl font-bold mb-6 text-gray-900 dark:text-white">
+        {article!.title}
+      </h1>
 
-    {/* Tags */}
-    {article.tags && article.tags.length > 0 && (
-      <div class="flex gap-2 mb-8">
-        {article.tags.map(tag => (
-          <span class="px-2 py-1 text-xs rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300">
-            {tag}
-          </span>
-        ))}
+      {/* Tags */}
+      {article!.tags && article!.tags.length > 0 && (
+        <div class="flex gap-2 mb-8">
+          {article!.tags.map(tag => (
+            <span class="px-2 py-1 text-xs rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Contenido HTML */}
+      <div set:html={html} />
+
+      {/* Metadata */}
+      <div class="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
+        Actualizado: {new Date(article!.updatedAt).toLocaleDateString('es-ES')}
       </div>
-    )}
-
-    {/* Contenido HTML */}
-    <div set:html={html} />
-
-    {/* Metadata */}
-    <div class="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
-      Actualizado: {new Date(article.updatedAt).toLocaleDateString('es-ES')}
-    </div>
-  </article>
+    </article>
+  )}
 
   {/* Table of Contents slot */}
   <div slot="toc">
@@ -96,7 +110,7 @@ const headings = extractHeadings(html);
 
           if (visible) {
             tocLinks.forEach(a => a.classList.remove('active', 'text-orange-600'));
-            const activeLink = document.querySelector(`[data-heading="${visible.target.id}"]`);
+            const activeLink = document.querySelector<HTMLAnchorElement>(`[data-heading="${visible.target.id}"]`);
             if (activeLink) {
               activeLink.classList.add('active', 'text-orange-600');
             }

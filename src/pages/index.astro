@@ -1,29 +1,27 @@
 ---
-// Homepage - Centro de Ayuda
+// Homepage - Centro de Ayuda con todas las vistas
 import DocsLayout from '../layouts/DocsLayout.astro';
 import { getArticles, getSections } from '../lib/api';
 
 const articles = await getArticles();
 const sections = await getSections();
 
-// Articulos recientes para featured
+// Ordenar por fecha de creacion para novedades
+const sortedArticles = [...articles].sort((a, b) => 
+  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+);
+
+// Articulos recientes para featured (home)
 const featuredArticles = articles.slice(0, 6);
+
+// Articulos recientes para novedades
+const recentArticles = sortedArticles.slice(0, 10);
 ---
 
-<DocsLayout title="Centro de Ayuda - Foca Software">
-  {/* Hero Section */}
-  <section class="text-center mb-16">
-    <h1 class="text-5xl font-bold mb-4 text-gray-900 dark:text-white">
-      Centro de <span class="text-orange-600">Ayuda</span>
-    </h1>
-    <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-      Encontrá respuestas a tus preguntas y aprende a usar nuestras herramientas
-    </p>
-  </section>
-
-  {/* Search placeholder */}
-  <div class="max-w-xl mx-auto mb-16">
-    <div class="relative">
+<DocsLayout title="Centro de Ayuda - Foca Software" activeView="home">
+  {/* Sticky Search Bar - aparece despues del scroll */}
+  <div id="search-sticky" class="hidden sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 -mx-8 px-8 py-4 shadow-sm">
+    <div class="relative max-w-xl mx-auto">
       <input
         type="search"
         placeholder="Buscar articulos..."
@@ -35,51 +33,249 @@ const featuredArticles = articles.slice(0, 6);
     </div>
   </div>
 
-  {/* Featured Articles */}
-  {featuredArticles.length > 0 && (
-    <section class="mb-16">
+  {/* ==================== VISTA: HOME ==================== */}
+  <div id="view-home" class="view">
+    {/* Hero Section - colapsa en scroll */}
+    <section id="hero" class="hero-section text-center mb-16 transition-all duration-300">
+      <h1 class="text-5xl font-bold mb-4 text-gray-900 dark:text-white">
+        Centro de <span class="text-orange-600">Ayuda</span>
+      </h1>
+      <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        Encontrá respuestas a tus preguntas y aprende a usar nuestras herramientas
+      </p>
+    </section>
+
+    {/* Search placeholder - escondida cuando sticky aparece */}
+    <div id="search-inline" class="max-w-xl mx-auto mb-16 transition-all duration-300">
+      <div class="relative">
+        <input
+          type="search"
+          placeholder="Buscar articulos..."
+          class="w-full px-4 py-3 pl-12 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+        />
+        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+    </div>
+
+    {/* Featured Articles */}
+    {featuredArticles.length > 0 && (
+      <section class="mb-16">
+        <h2 class="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">
+          Articulos populares
+        </h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          {featuredArticles.map(article => (
+            <a
+              href={`/${article.slug}`}
+              class="block p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-orange-500 dark:hover:border-orange-500 hover:shadow-lg transition-all group"
+            >
+              <h3 class="text-lg font-medium text-gray-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 mb-2">
+                {article.title}
+              </h3>
+              {article.section && (
+                <span class="text-sm text-gray-500 dark:text-gray-400">
+                  {article.section}
+                </span>
+              )}
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {/* Sections Grid */}
+    <section>
       <h2 class="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">
-        Articulos populares
+        Explorar por seccion
       </h2>
-      <div class="grid gap-4 md:grid-cols-2">
-        {featuredArticles.map(article => (
+      <div class="grid gap-4 md:grid-cols-3">
+        {sections.map(section => (
           <a
-            href={`/${article.slug}`}
-            class="block p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-orange-500 dark:hover:border-orange-500 hover:shadow-lg transition-all group"
+            href={`/section/${encodeURIComponent(section)}`}
+            class="p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-orange-500 dark:hover:border-orange-500 hover:shadow-lg transition-all group"
           >
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 mb-2">
-              {article.title}
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400">
+              {section}
             </h3>
-            {article.section && (
-              <span class="text-sm text-gray-500 dark:text-gray-400">
-                {article.section}
-              </span>
-            )}
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {articles.filter(a => a.section === section).length} articulos
+            </p>
           </a>
         ))}
       </div>
     </section>
-  )}
+  </div>
 
-  {/* Sections Grid */}
-  <section>
-    <h2 class="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">
-      Explorar por seccion
-    </h2>
-    <div class="grid gap-4 md:grid-cols-3">
-      {sections.map(section => (
-        <a
-          href={`/section/${encodeURIComponent(section)}`}
-          class="p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-orange-500 dark:hover:border-orange-500 hover:shadow-lg transition-all group"
-        >
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400">
-            {section}
-          </h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {articles.filter(a => a.section === section).length} articulos
-          </p>
-        </a>
-      ))}
+  {/* ==================== VISTA: NOVEDADES ==================== */}
+  <div id="view-novedades" class="view hidden">
+    <h1 class="text-4xl font-bold mb-2 text-gray-900 dark:text-white">
+      Novedades
+    </h1>
+    <p class="text-gray-600 dark:text-gray-400 mb-8">
+      Ultimos articulos y actualizaciones
+    </p>
+
+    {recentArticles.length > 0 ? (
+      <div class="space-y-4">
+        {recentArticles.map(article => (
+          <a
+            href={`/${article.slug}`}
+            class="block p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-orange-500 dark:hover:border-orange-500 hover:shadow-lg transition-all group"
+          >
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <h2 class="text-xl font-medium text-gray-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 mb-1">
+                  {article.title}
+                </h2>
+                {article.section && (
+                  <span class="text-sm text-orange-600 dark:text-orange-400">
+                    {article.section}
+                  </span>
+                )}
+              </div>
+              <span class="text-sm text-gray-400 dark:text-gray-500 whitespace-nowrap ml-4">
+                {new Date(article.createdAt).toLocaleDateString('es-ES')}
+              </span>
+            </div>
+            {article.tags && article.tags.length > 0 && (
+              <div class="flex gap-2 mt-3">
+                {article.tags.slice(0, 3).map(tag => (
+                  <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+        <p>No hay novedades todavia.</p>
+      </div>
+    )}
+  </div>
+
+  {/* ==================== VISTA: SOPORTE ==================== */}
+  <div id="view-soporte" class="view hidden">
+    <h1 class="text-4xl font-bold mb-2 text-gray-900 dark:text-white">
+      Soporte
+    </h1>
+    <p class="text-gray-600 dark:text-gray-400 mb-8">
+      Estamos aqui para ayudarte
+    </p>
+
+    {/* Contact Info */}
+    <div class="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-6 mb-8">
+      <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+        Contacto directo
+      </h2>
+      <div class="space-y-3">
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span class="text-gray-700 dark:text-gray-300">soporte@focasoftware.com</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="text-gray-700 dark:text-gray-300">Lunes a Viernes, 9:00 - 18:00</span>
+        </div>
+      </div>
     </div>
-  </section>
+
+    {/* FAQ Section */}
+    <div class="space-y-6">
+      <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">
+        Preguntas frecuentes
+      </h2>
+      
+      <div class="space-y-4">
+        <details class="group">
+          <summary class="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 cursor-pointer list-none">
+            <span class="font-medium text-gray-900 dark:text-white">Como puedo restablecer mi contraseña?</span>
+            <svg class="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-2 px-4 pb-4 text-gray-600 dark:text-gray-400">
+            Puedes restablecer tu contraseña desde la pantalla de inicio de sesion. Haz clic en "Olvidaste tu contraseña?" y sigue las instrucciones enviadas a tu correo electronico.
+          </div>
+        </details>
+
+        <details class="group">
+          <summary class="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 cursor-pointer list-none">
+            <span class="font-medium text-gray-900 dark:text-white">Donde encuentro mi historial de facturas?</span>
+            <svg class="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-2 px-4 pb-4 text-gray-600 dark:text-gray-400">
+            Accede a tu perfil y selecciona la seccion "Facturas". Ahi podras ver y descargar todas tus facturas en formato PDF.
+          </div>
+        </details>
+
+        <details class="group">
+          <summary class="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 cursor-pointer list-none">
+            <span class="font-medium text-gray-900 dark:text-white">Como contacto con atencion al cliente?</span>
+            <svg class="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-2 px-4 pb-4 text-gray-600 dark:text-gray-400">
+            Puedes escribirnos a soporte@focasoftware.com o usar el formulario de contacto. Nuestro equipo responde en menos de 24 horas habiles.
+          </div>
+        </details>
+
+        <details class="group">
+          <summary class="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 cursor-pointer list-none">
+            <span class="font-medium text-gray-900 dark:text-white">Cuales son los metodos de pago disponibles?</span>
+            <svg class="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-2 px-4 pb-4 text-gray-600 dark:text-gray-400">
+            Aceptamos tarjetas de credito y debito (Visa, Mastercard, American Express), transferencia bancaria y MercadoPago.
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  {/* Hero scroll behavior script */}
+  <script>
+    const hero = document.getElementById('hero');
+    const searchInline = document.getElementById('search-inline');
+    const searchSticky = document.getElementById('search-sticky');
+
+    if (hero && searchInline && searchSticky) {
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 100) {
+          // Colapsar hero con fade out
+          hero.classList.add('opacity-0', '-translate-y-4');
+          hero.classList.add('h-0', 'overflow-hidden', 'mb-0');
+          
+          // Mostrar search sticky
+          searchSticky.classList.remove('hidden');
+          
+          // Esconder search inline
+          searchInline.classList.add('opacity-0', 'h-0', 'overflow-hidden', 'mb-0');
+        } else {
+          // Restaurar hero
+          hero.classList.remove('opacity-0', '-translate-y-4');
+          hero.classList.remove('h-0', 'overflow-hidden', 'mb-0');
+          
+          // Esconder search sticky
+          searchSticky.classList.add('hidden');
+          
+          // Mostrar search inline
+          searchInline.classList.remove('opacity-0', 'h-0', 'overflow-hidden', 'mb-0');
+        }
+      });
+    }
+  </script>
 </DocsLayout>
