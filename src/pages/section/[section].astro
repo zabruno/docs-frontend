@@ -1,0 +1,67 @@
+---
+// Pagina de lista de articulos por seccion
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import { getArticlesBySection } from '../../lib/api';
+
+const { section } = Astro.params;
+
+if (!section) {
+  return Astro.redirect('/');
+}
+
+const decodedSection = decodeURIComponent(section);
+const articles = await getArticlesBySection(decodedSection);
+---
+
+<DocsLayout title={`${decodedSection} - Centro de Ayuda`}>
+  {/* Breadcrumb */}
+  <nav class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+    <a href="/" class="hover:text-orange-600 dark:hover:text-orange-400">Ayuda</a>
+    <span class="mx-2">/</span>
+    <span class="text-gray-900 dark:text-white">{decodedSection}</span>
+  </nav>
+
+  {/* Header */}
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold mb-2 text-gray-900 dark:text-white">
+      {decodedSection}
+    </h1>
+    <p class="text-gray-600 dark:text-gray-400">
+      {articles.length} {articles.length === 1 ? 'articulo' : 'articulos'}
+    </p>
+  </div>
+
+  {/* Articles List */}
+  {articles.length > 0 ? (
+    <div class="space-y-4">
+      {articles.map(article => (
+        <a
+          href={`/${article.slug}`}
+          class="block p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-orange-500 dark:hover:border-orange-500 hover:shadow-lg transition-all group"
+        >
+          <h2 class="text-xl font-medium text-gray-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 mb-2">
+            {article.title}
+          </h2>
+          {article.tags && article.tags.length > 0 && (
+            <div class="flex gap-2 mt-3">
+              {article.tags.slice(0, 3).map(tag => (
+                <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </a>
+      ))}
+    </div>
+  ) : (
+    <div class="text-center py-12">
+      <p class="text-gray-500 dark:text-gray-400">
+        No hay articulos en esta seccion todavia.
+      </p>
+      <a href="/" class="mt-4 inline-block text-orange-600 hover:text-orange-700 dark:hover:text-orange-400">
+        Volver al inicio
+      </a>
+    </div>
+  )}
+</DocsLayout>
