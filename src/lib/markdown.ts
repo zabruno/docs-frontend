@@ -61,3 +61,8 @@ export function extractHeadings(html: string) {
   
   return headings;
 }
+
+// Envolver tablas en contenedor scrollable para mobile
+export function wrapTables(html: string): string {
+  return html.replace(/<table>/g, '<div class="table-wrapper"><table>').replace(/<\/table>/g, '</table></div>');
+}
