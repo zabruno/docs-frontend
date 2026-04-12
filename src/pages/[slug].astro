@@ -2,7 +2,7 @@
 // Pagina de articulo individual
 import DocsLayout from '../layouts/DocsLayout.astro';
 import { getArticle } from '../lib/api';
-import { parseMarkdown, extractHeadings, wrapTables } from '../lib/markdown';
+import { parseMarkdown, extractHeadings } from '../lib/markdown';
 
 const { slug } = Astro.params;
 
@@ -26,7 +26,6 @@ let headings: { level: number; id: string; text: string }[] = [];
 
 if (article) {
   html = await parseMarkdown(article.content);
-  html = wrapTables(html); // Envolver tablas en scroll container
   headings = extractHeadings(html);
 }
 ---
