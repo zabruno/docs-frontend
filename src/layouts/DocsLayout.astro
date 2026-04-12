@@ -21,7 +21,7 @@ const sections = await getSections();
       {/* Hamburger button - solo visible en mobile */}
       <button
         id="sidebar-toggle"
-        class="hidden lg:hidden p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        class="hidden lg:hidden p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-150"
         aria-label="Abrir menu"
         aria-expanded="false"
         aria-controls="sidebar"
@@ -37,7 +37,7 @@ const sections = await getSections();
       {/* Right side: Theme toggle */}
       <button
         id="theme-toggle"
-        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-150"
         aria-label="Cambiar tema"
       >
         {/* Sun icon - visible in dark mode */}
@@ -67,7 +67,7 @@ const sections = await getSections();
   >
     <div class="p-4">
       {/* Logo / Brand */}
-      <a href="/" class="flex items-center gap-2 mb-6">
+      <a href="/" class="flex items-center gap-2 mb-6 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 rounded-lg">
         <span class="text-xl font-bold text-orange-600">Foca</span>
         <span class="text-gray-500 dark:text-gray-400">Docs</span>
       </a>
@@ -76,19 +76,19 @@ const sections = await getSections();
       <nav class="space-y-1 mb-6">
         <button
           data-view="home"
-          class="nav-btn w-full text-left px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          class="nav-btn w-full text-left px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-150"
         >
           Ayuda
         </button>
         <button
           data-view="novedades"
-          class="nav-btn w-full text-left px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          class="nav-btn w-full text-left px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-150"
         >
           Novedades
         </button>
         <button
           data-view="soporte"
-          class="nav-btn w-full text-left px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          class="nav-btn w-full text-left px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-150"
         >
           Soporte
         </button>
@@ -105,7 +105,7 @@ const sections = await getSections();
         {sections.map(section => (
           <a
             href={`/section/${encodeURIComponent(section)}`}
-            class="block px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
+            class="block px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-150"
           >
             {section}
           </a>
@@ -129,7 +129,7 @@ const sections = await getSections();
           </p>
           <button
             data-view="home"
-            class="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+            class="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 active:scale-95 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-150"
           >
             Volver al inicio
           </button>
