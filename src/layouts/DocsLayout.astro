@@ -16,12 +16,12 @@ const sections = await getSections();
 
 <Layout title={title} description={description}>
   {/* Header with theme toggle and hamburger */}
-  <header class="fixed top-0 right-0 left-0 lg:left-64 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
-    <div class="flex items-center justify-between px-4 lg:px-6 py-3">
+  <header class="fixed top-0 right-0 left-0 lg:left-64 z-50 h-14 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
+    <div class="flex items-center justify-end h-full pr-4 lg:pr-6">
       {/* Hamburger button - solo visible en mobile */}
       <button
         id="sidebar-toggle"
-        class="hidden lg:hidden p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-150"
+        class="hidden lg:hidden mr-auto p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-150"
         aria-label="Abrir menu"
         aria-expanded="false"
         aria-controls="sidebar"
@@ -30,9 +30,6 @@ const sections = await getSections();
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
-
-      {/* Spacer for alignment when hamburger is hidden */}
-      <div class="lg:hidden w-10"></div>
 
       {/* Right side: Theme toggle */}
       <button
@@ -116,7 +113,7 @@ const sections = await getSections();
 
   {/* Main Content Area */}
   <main class="flex-1 lg:ml-64">
-    <div class="max-w-4xl mx-auto px-4 lg:px-8 py-12 pt-16 lg:pt-12">
+    <div class="max-w-4xl mx-auto px-4 lg:px-8 py-12 pt-20 lg:pt-16">
       {/* Error state */}
       {error ? (
         <div class="text-center py-20">
