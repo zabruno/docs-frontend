@@ -19,6 +19,12 @@ const recentArticles = sortedArticles.slice(0, 10);
 
 // API URL para el frontend
 const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:8080/api';
+
+// Contar articulos por seccion
+const sectionArticleCount = sections.reduce((acc, section) => {
+  acc[section.id] = articles.filter(a => a.section?.id === section.id).length;
+  return acc;
+}, {} as Record<string, number>);
 ---
 
 <DocsLayout title="Centro de Ayuda - Foca Software" activeView="home">
@@ -87,7 +93,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:8080/api';
               </h3>
               {article.section && (
                 <span class="text-sm text-gray-500 dark:text-gray-400">
-                  {article.section}
+                  {article.section.name}
                 </span>
               )}
             </a>
@@ -103,17 +109,17 @@ const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:8080/api';
       </h2>
       <div class="grid gap-4 md:grid-cols-3">
         {sections.map(section => (
-          <a
-            href={`/section/${encodeURIComponent(section)}`}
-            class="p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-orange-500 dark:hover:border-orange-500 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all duration-150 group"
+          <button
+            data-section-id={section.id}
+            class="section-nav-btn w-full text-left p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-orange-500 dark:hover:border-orange-500 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all duration-150 group"
           >
             <h3 class="text-lg font-medium text-gray-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400">
-              {section}
+              {section.name}
             </h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {articles.filter(a => a.section === section).length} articulos
+              {sectionArticleCount[section.id] || 0} articulos
             </p>
-          </a>
+          </button>
         ))}
       </div>
     </section>
@@ -142,7 +148,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:8080/api';
                 </h2>
                 {article.section && (
                   <span class="text-sm text-orange-600 dark:text-orange-400">
-                    {article.section}
+                    {article.section.name}
                   </span>
                 )}
               </div>
@@ -154,7 +160,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:8080/api';
               <div class="flex gap-2 mt-3">
                 {article.tags.slice(0, 3).map(tag => (
                   <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
-                    {tag}
+                    {tag.name}
                   </span>
                 ))}
               </div>

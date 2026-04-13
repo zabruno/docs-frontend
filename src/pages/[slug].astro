@@ -43,8 +43,8 @@ if (article) {
             Ayuda
           </button>
           <span class="mx-2">/</span>
-          <a href={`/section/${encodeURIComponent(article!.section)}`} class="hover:text-orange-600 dark:hover:text-orange-400">
-            {article!.section}
+          <a href={`/section/${encodeURIComponent(article!.section.name)}`} class="hover:text-orange-600 dark:hover:text-orange-400">
+            {article!.section.name}
           </a>
         </nav>
       )}
@@ -59,7 +59,7 @@ if (article) {
         <div class="flex flex-wrap gap-2 mb-8">
           {article!.tags.map(tag => (
             <span class="px-2 py-1 text-xs rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300">
-              {tag}
+              {tag.name}
             </span>
           ))}
         </div>

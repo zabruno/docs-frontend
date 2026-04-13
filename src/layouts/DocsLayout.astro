@@ -12,6 +12,7 @@ export interface Props {
 
 const { title, description, error = false, activeView = 'home' } = Astro.props;
 const sections = await getSections();
+const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:8080/api';
 ---
 
 <Layout title={title} description={description}>
@@ -100,12 +101,13 @@ const sections = await getSections();
           Secciones
         </p>
         {sections.map(section => (
-          <a
-            href={`/section/${encodeURIComponent(section)}`}
-            class="block px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-150"
+          <button
+            data-section-id={section.id}
+            data-view="section"
+            class="section-nav-btn w-full text-left px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-150"
           >
-            {section}
-          </a>
+            {section.name}
+          </button>
         ))}
       </div>
     </div>
@@ -132,8 +134,10 @@ const sections = await getSections();
           </button>
         </div>
       ) : (
-        <slot view={activeView} />
+        <div id="section-articles" class="view hidden space-y-4"></div>
       )}
+      
+      <slot view={activeView} />
     </div>
   </main>
 
@@ -145,27 +149,37 @@ const sections = await getSections();
   </aside>
 
   {/* View switching script - minimal vanilla JS */}
-  <script>
+  <script define:vars={{ API_URL }}>
+    function closeSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const toggle = document.getElementById('sidebar-toggle');
+      const overlay = document.getElementById('sidebar-overlay');
+      if (sidebar) {
+        sidebar.classList.add('-translate-x-full');
+        sidebar.setAttribute('aria-hidden', 'false');
+      }
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+      if (overlay) overlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
     function initViewSwitcher() {
-      const navBtns = document.querySelectorAll<HTMLButtonElement>('[data-view]');
+      const navBtns = document.querySelectorAll<HTMLButtonElement>('[data-view]:not(.section-nav-btn)');
       
       navBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           const view = btn.dataset.view;
           
-          // Ocultar todas las vistas
           document.querySelectorAll<HTMLElement>('.view').forEach(v => {
             v.classList.add('hidden');
           });
           
-          // Mostrar la vista seleccionada
           const targetView = document.getElementById(`view-${view}`);
           if (targetView) {
             targetView.classList.remove('hidden');
           }
           
-          // Actualizar estado activo en sidebar
           navBtns.forEach(b => {
             b.classList.remove('bg-orange-100', 'dark:bg-orange-900/30', 'text-orange-600', 'dark:text-orange-400');
             b.classList.add('text-gray-700', 'dark:text-gray-300');
@@ -173,13 +187,68 @@ const sections = await getSections();
           btn.classList.remove('text-gray-700', 'dark:text-gray-300');
           btn.classList.add('bg-orange-100', 'dark:bg-orange-900/30', 'text-orange-600', 'dark:text-orange-400');
           
-          // Scroll al inicio
+          closeSidebar();
           window.scrollTo({ top: 0, behavior: 'smooth' });
         });
       });
     }
+
+    function initSectionNav() {
+      const sectionBtns = document.querySelectorAll<HTMLButtonElement>('.section-nav-btn');
+      
+      sectionBtns.forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const sectionId = btn.dataset.sectionId;
+          if (!sectionId) return;
+          
+          closeSidebar();
+          
+          try {
+            const res = await fetch(`${API_URL}/articles?sectionId=${sectionId}`);
+            if (!res.ok) throw new Error('Failed to fetch');
+            const articles = await res.json();
+            
+            const container = document.getElementById('section-articles');
+            if (container) {
+              document.querySelectorAll<HTMLElement>('.view').forEach(v => v.classList.add('hidden'));
+              container.classList.remove('hidden');
+              
+              const listEl = container.querySelector('#section-articles-list');
+              if (listEl && articles.length > 0) {
+                listEl.innerHTML = articles.map(a => `
+                  <a href="/${a.slug}" class="block p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-orange-500 dark:hover:border-orange-500 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all duration-150 group">
+                    <h2 class="text-xl font-medium text-gray-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 mb-2">
+                      ${escapeHtml(a.title)}
+                    </h2>
+                    ${a.tags && a.tags.length > 0 ? `
+                      <div class="flex gap-2 mt-3">
+                        ${a.tags.slice(0, 3).map(t => `
+                          <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">${escapeHtml(t.name)}</span>
+                        `).join('')}
+                      </div>
+                    ` : ''}
+                  </a>
+                `).join('');
+              } else if (listEl) {
+                listEl.innerHTML = '<p class="text-center py-12 text-gray-500 dark:text-gray-400">No hay articulos en esta seccion.</p>';
+              }
+            }
+          } catch (err) {
+            console.error('Error loading section:', err);
+          }
+        });
+      });
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
     
     initViewSwitcher();
+    initSectionNav();
   </script>
 
   {/* Theme toggle script - isolated */}

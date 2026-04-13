@@ -61,9 +61,12 @@ El frontend consume los siguientes endpoints del backend:
 | Endpoint | Uso |
 |----------|-----|
 | `GET /api/articles` | Lista de artículos |
+| `GET /api/articles?sectionId=` | Filtrar por sección |
+| `GET /api/articles?tagId=` | Filtrar por tag |
 | `GET /api/articles/{slug}` | Contenido de artículo |
 | `GET /api/articles/search?q=` | Búsqueda |
-| `GET /api/sections` | Secciones |
+| `GET /api/sections` | Secciones (ordenadas por posición) |
+| `GET /api/tags` | Tags |
 
 ---
 
